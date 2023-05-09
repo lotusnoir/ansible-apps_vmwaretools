@@ -1,0 +1,7 @@
+---
+vmwaretools_primary_int_subnet: "172."
+ansible_virtualization_type: "VMware"
+wmwaretools_config:
+  guestinfo:
+    exclude-nics: docker*,veth*,lo*
+    primary-nics: "{{ private_interface }}"
