@@ -1,50 +1,54 @@
 ---
-- name: "DEBIAN | installing open-vm-tools"
-  ansible.builtin.apt:
-    name: open-vm-tools
-    state: present
-  when: ansible_os_family == "Debian" and ansible_virtualization_type == "VMware"
-
-- name: "REDHAT | installing open-vm-tools"
-  ansible.builtin.yum:
-    name: open-vm-tools
-    state: present
-  when: ansible_os_family == "RedHat" and ansible_virtualization_type == "VMware"
-
-- name: "REDHAT | starting and enabling open-vm-tools"
-  ansible.builtin.service:
-    name: vmtoolsd.service
-    state: restarted
-    enabled: true
-  when: ansible_os_family == "RedHat" and ansible_virtualization_type == "VMware"
-
-- name: "Find interface for primary subnet/ip"
-  ansible.builtin.set_fact:
-    private_interface: "{{ hostvars[inventory_hostname]['ansible_' + item]['device'] }}"
+- name: "Install and configure open-vm-tools"
   when:
-    - hostvars[inventory_hostname]['ansible_' + item].ipv4 is defined
-    - "vmwaretools_primary_int_subnet in hostvars[inventory_hostname]['ansible_' + item]['ipv4']['address']"
-  with_items: "{{ ansible_interfaces }}"
+    - ansible_virtualization_type == "VMware"
+  block:
+    - name: "DEBIAN | installing open-vm-tools"
+      ansible.builtin.apt:
+        name: open-vm-tools
+        state: present
+      when: ansible_os_family == "Debian"
 
-- name: "DEBUG | Print network interface"
-  ansible.builtin.debug:
-    msg: Interface {{ private_interface | default("not") }} found
+    - name: "REDHAT | installing open-vm-tools"
+      ansible.builtin.yum:
+        name: open-vm-tools
+        state: present
+      when: ansible_os_family == "RedHat"
 
-- name: "Ensure configuration folder exists"
-  ansible.builtin.file:
-    path: /etc/vmware-tools/
-    state: directory
-    mode: '0755'
+    - name: "REDHAT | starting and enabling open-vm-tools"
+      ansible.builtin.service:
+        name: vmtoolsd.service
+        state: restarted
+        enabled: true
+      when: ansible_os_family == "RedHat"
 
-- name: "Create tools configuration"
-  ansible.builtin.template:
-    src: "tools.conf.j2"
-    dest: "/etc/vmware-tools/tools.conf"
-    mode: 0644
-    owner: root
-    group: root
-  when:
-    - wmwaretools_config is defined
-    - wmwaretools_config | length > 0
-#  notify:
-#    - restart open-vm-tools
+    - name: "Find interface for primary subnet/ip"
+      ansible.builtin.set_fact:
+        private_interface: "{{ hostvars[inventory_hostname]['ansible_' + item]['device'] }}"
+      when:
+        - hostvars[inventory_hostname]['ansible_' + item].ipv4 is defined
+        - "vmwaretools_primary_int_subnet in hostvars[inventory_hostname]['ansible_' + item]['ipv4']['address']"
+      with_items: "{{ ansible_interfaces }}"
+
+    - name: "DEBUG | Print network interface"
+      ansible.builtin.debug:
+        msg: Interface {{ private_interface | default("not") }} found
+
+    - name: "Ensure configuration folder exists"
+      ansible.builtin.file:
+        path: /etc/vmware-tools/
+        state: directory
+        mode: '0755'
+
+    - name: "Create tools configuration"
+      ansible.builtin.template:
+        src: "tools.conf.j2"
+        dest: "/etc/vmware-tools/tools.conf"
+        mode: 0644
+        owner: root
+        group: root
+      when:
+        - wmwaretools_config is defined
+        - wmwaretools_config | length > 0
+      notify:
+        - restart open-vm-tools
