@@ -5,22 +5,8 @@
   block:
     - name: "Installing open-vm-tools"
       ansible.builtin.package:
-        name: open-vm-tools
+        name: "{{ _vmwaretools_pkg }}"
         state: present
-        update_cache: true
-        cache_valid_time: "{{ '3600' if ansible_facts.pkg_mgr == 'apt' else omit }}"
-      become: true
-      register: pkg_install
-      until: pkg_install is not failed
-      retries: 3
-      delay: 10
-
-    - name: "REDHAT | starting and enabling open-vm-tools"
-      ansible.builtin.service:
-        name: vmtoolsd.service
-        state: restarted
-        enabled: true
-      when: ansible_os_family == "RedHat"
 
     - name: "Find interface for primary subnet/ip"
       ansible.builtin.set_fact:
@@ -30,15 +16,17 @@
         - "vmwaretools_primary_int_subnet in hostvars[inventory_hostname]['ansible_' + item]['ipv4']['address']"
       with_items: "{{ ansible_interfaces }}"
 
-    - name: "DEBUG | Print network interface"
-      ansible.builtin.debug:
-        msg: Interface {{ private_interface | default("not") }} found
+    #- name: "DEBUG | Print network interface"
+    #  ansible.builtin.debug:
+    #    msg: Interface {{ private_interface | default("not") }} found
 
     - name: "Ensure configuration folder exists"
       ansible.builtin.file:
         path: /etc/vmware-tools/
         state: directory
         mode: '0755'
+        owner: root
+        group: root
 
     - name: "Create tools configuration"
       ansible.builtin.template:
