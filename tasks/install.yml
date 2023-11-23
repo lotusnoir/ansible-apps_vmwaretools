@@ -7,6 +7,10 @@
       ansible.builtin.package:
         name: "{{ _vmwaretools_pkg }}"
         state: present
+      register: pkg_result
+      retries: 12
+      delay: 10
+      until: pkg_result is success
 
     - name: "Find interface for primary subnet/ip"
       ansible.builtin.set_fact:
