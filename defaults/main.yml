@@ -1,6 +1,6 @@
 ---
+#regex of primary ip address to find primary-nics
 vmwaretools_primary_int_subnet: "172."
-ansible_virtualization_type: "VMware"
 wmwaretools_config:
   guestinfo:
     exclude-nics: "docker*,br-*,veth*,lo*"
