@@ -42,5 +42,4 @@
       when:
         - wmwaretools_config is defined
         - wmwaretools_config | length > 0
-      notify:
-        - restart open-vm-tools
+      notify: Restart open-vm-tools

@@ -1,5 +1,5 @@
 ---
-- name: restart open-vm-tools
+- name: Restart open-vm-tools
   ansible.builtin.service:
     name: "{{ _vmwaretools_svc_name }}"
     state: restarted
