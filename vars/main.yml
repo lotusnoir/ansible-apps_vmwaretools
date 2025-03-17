@@ -1,3 +1,3 @@
 ---
-#default package name
+# Default pkg
 _vmwaretools_pkg: open-vm-tools

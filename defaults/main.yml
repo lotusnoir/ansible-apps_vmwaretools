@@ -1,5 +1,5 @@
 ---
-#regex of primary ip address to find primary-nics
+# regex of primary ip address to find primary-nics
 vmwaretools_primary_int_subnet: "172."
 wmwaretools_config:
   guestinfo:
