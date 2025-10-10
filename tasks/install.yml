@@ -7,10 +7,10 @@
       ansible.builtin.package:
         name: "{{ _vmwaretools_pkg }}"
         state: present
-      register: __pkg_result
+      register: pkg_result
       retries: 12
       delay: 10
-      until: __pkg_result is success
+      until: pkg_result is success
 
     - name: "Find interface for primary subnet/ip"
       ansible.builtin.set_fact:
@@ -20,11 +20,15 @@
         - "vmwaretools_primary_int_subnet in hostvars[inventory_hostname]['ansible_' + item]['ipv4']['address']"
       with_items: "{{ ansible_interfaces }}"
 
+    #- name: "DEBUG | Print network interface"
+    #  ansible.builtin.debug:
+    #    msg: Interface {{ private_interface | default("not") }} found
+
     - name: "Ensure configuration folder exists"
       ansible.builtin.file:
         path: /etc/vmware-tools/
         state: directory
-        mode: "0755"
+        mode: '0755'
         owner: root
         group: root
 
@@ -32,7 +36,7 @@
       ansible.builtin.template:
         src: "tools.conf.j2"
         dest: "/etc/vmware-tools/tools.conf"
-        mode: "0644"
+        mode: '0644'
         owner: root
         group: root
       when:
